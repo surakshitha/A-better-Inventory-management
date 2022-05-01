@@ -22,7 +22,7 @@ async function get(_, { id }) {
 }
 
 async function update(_, { id, changes }) {
-  console.log("changes: ", changes);
+  console.log('changes: ', changes);
   const db = getDb();
   if (changes.name || changes.category || changes.price || changes.image) {
     const product = await db.collection('products').findOne({ id });
@@ -31,7 +31,7 @@ async function update(_, { id, changes }) {
 
   await db.collection('products').updateOne({ id }, { $set: changes });
   const savedProduct = await db.collection('products').findOne({ id });
-  console.log("Saved product: ", savedProduct);
+  console.log('Saved product: ', savedProduct);
   return savedProduct;
 }
 
@@ -49,6 +49,20 @@ async function remove(_, { id }) {
   return false;
 }
 
+async function findCount() {
+  const db = getDb();
+  const products = await db.collection('products')
+    .aggregate([
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+        },
+      },
+    ]).toArray();
+  return products[0].total;
+}
+
 module.exports = {
-  list, add, get, update, delete: remove,
+  list, add, get, update, delete: remove, findCount,
 };

@@ -7,7 +7,7 @@ import graphQLFetch from './graphQLFetch.js';
 class ProductList extends React.Component {
   constructor() {
     super();
-    this.state = { products: [] };
+    this.state = { products: [], productCount: 0 };
     this.createProduct = this.createProduct.bind(this);
     this.deleteProduct = this.deleteProduct.bind(this);
   }
@@ -16,7 +16,19 @@ class ProductList extends React.Component {
     this.loadData();
   }
 
+  async getCount() {
+    const query = `query {
+              productCount
+          }`;
+
+    const data = await graphQLFetch(query);
+    if (data) {
+      this.setState({ productCount: data.productCount });
+    }
+  }
+
   async loadData() {
+    this.getCount();
     const query = `query {
               productList {
                   id
@@ -67,10 +79,13 @@ class ProductList extends React.Component {
   }
 
   render() {
-    const { products } = this.state;
+    const { products, productCount } = this.state;
     return (
       <React.Fragment>
         Showing all available products
+        <h4>
+          {`Showing ${productCount} available products`}
+        </h4>
         <hr />
         <ProductTable
           products={products}
